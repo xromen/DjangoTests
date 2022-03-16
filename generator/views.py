@@ -1,5 +1,7 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.decorators import login_required
 import json
 import datetime
 from os import path
@@ -67,7 +69,7 @@ def done(request):
     if [zapis['interval'], zapis['aNum']] in [[i['interval'], i['aNum']] for i in data]:
         return render(request, 'generator/nDone.html', {'mess': 'Данный интервал стирки уже занят'})
     elif not zapis['room'].isdigit():
-        return render(request, 'generator/nDone.html', {'mess': 'Номер комнаты должен быть числом или пустым'})
+        return render(request, 'generator/nDone.html', {'mess': 'Номер комнаты должен быть числом и не пустым'})
     elif zapis['secName'] == '':
         return render(request, 'generator/nDone.html', {'mess': 'Фамилия не может быть пустой'})
     else:
@@ -78,3 +80,34 @@ def done(request):
             json.dump(data, file, ensure_ascii=False)
 
         return render(request, 'generator/done.html', {'interval': intervals[interval]})
+
+def vLogin(request):
+    if request.GET:
+        return render(request, 'generator/login.html', {'next' : request.GET['next']})
+    if request.POST:
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(username=username, password=password)
+        if user is not None:
+            if user.is_active:
+                login(request, user)
+                return redirect(request.POST['next'])
+
+@login_required
+def admin(request):
+    with open(filePath, encoding='utf-8') as file:
+        data = json.load(file)
+    return render(request, 'generator/redact.html', {'data' : data, 'intervals': intervals})
+
+
+def delZapis(request):
+    keys = list(request.GET)
+    with open(filePath, encoding='utf-8') as file:
+        data = json.load(file)
+    for i in keys:
+        data.pop(int(i))
+
+    with open(filePath, 'w', encoding='utf-8') as file:
+        json.dump(data, file, ensure_ascii=False)
+
+    return redirect('/admin/')
