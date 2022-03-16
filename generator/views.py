@@ -31,6 +31,7 @@ def home(request):
         with open(filePath, encoding='utf-8') as file:
             data = json.load(file)
 
+
         a = [[k for k in data if k['aNum'] == i] for i in range(4)]
 
         if not len(data) == 0:
