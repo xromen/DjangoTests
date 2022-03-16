@@ -53,7 +53,7 @@ def home(request):
         with open(filePath, 'w', encoding='utf-8') as file:
             json.dump([], file)
 
-    return render(request, 'generator/home.html', {'intervals' : intervals, 'data' : dat, 'today' : todayStr})
+    return render(request, 'generator/home.html', {'intervals' : intervals, 'data' : dat, 'today' : todayStr, 'nowTime': datetime.datetime.now().hour})
 
 def done(request):
     interval = int(request.GET['interval'])
