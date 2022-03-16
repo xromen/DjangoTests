@@ -26,6 +26,10 @@ filePath = 'generator/static/history/'+todayStr+'.json'
 def get_interval(d):
     return d['interval']
 
+def get_current_time() -> datetime:
+    delta = datetime.timedelta(hours=10, minutes=0)
+    return datetime.datetime.now(datetime.timezone.utc) + delta
+
 def home(request):
     dat = []
 
@@ -53,7 +57,7 @@ def home(request):
         with open(filePath, 'w', encoding='utf-8') as file:
             json.dump([], file)
 
-    return render(request, 'generator/home.html', {'intervals' : intervals, 'data' : dat, 'today' : todayStr, 'nowTime': datetime.datetime.now().hour})
+    return render(request, 'generator/home.html', {'intervals' : intervals, 'data' : dat, 'today' : todayStr, 'nowTime': get_current_time().hour})
 
 def done(request):
     interval = int(request.GET['interval'])
