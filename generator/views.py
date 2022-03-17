@@ -15,6 +15,13 @@ def get_current_time() -> datetime:
     delta = datetime.timedelta(hours=10, minutes=0)
     return datetime.datetime.now(datetime.timezone.utc) + delta
 
+def lists_subtract(a, b):
+    c = []
+    for i in a:
+        if not (i in b):
+            c.append(i)
+    return c
+
 intervals = ['8:00-9:30',
                  '9:30-11:00',
                  '11:00-12:30',
@@ -119,9 +126,19 @@ def delZapis(request):
     return redirect('/admin/')
 
 def checkChange(request):
-    print(request.GET)
+    oldData = json.loads(request.POST['content'])
+    oldNewData = json.loads(request.POST['newContent'])
+    oldData = oldData + oldNewData
+    #print(oldData)
+
+    with open(filePath, encoding='utf-8') as file:
+        newData = json.load(file)
+
+    sub = lists_subtract(newData, oldData)
+    #print(sub)
+
     response = {
-        'is_taken' : False,
-        'data' : 'maxim'
+        'is_taken' : not sub==[],
+        'data' : sub
     }
     return JsonResponse(response)
