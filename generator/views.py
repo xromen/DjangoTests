@@ -2,9 +2,18 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 import json
 import datetime
 from os import path
+
+
+def get_interval(d):
+    return d['interval']
+
+def get_current_time() -> datetime:
+    delta = datetime.timedelta(hours=10, minutes=0)
+    return datetime.datetime.now(datetime.timezone.utc) + delta
 
 intervals = ['8:00-9:30',
                  '9:30-11:00',
@@ -17,19 +26,11 @@ intervals = ['8:00-9:30',
                  '20:00-21:30',
                  '21:30-23:00']
 
-today = datetime.date.today()
+today = get_current_time()
 todayStr = datetime.date.strftime(today, '%d.%m.%Y')
 filePath = 'generator/static/history/'+todayStr+'.json'
 
 # Create your views here.
-
-def get_interval(d):
-    return d['interval']
-
-def get_current_time() -> datetime:
-    delta = datetime.timedelta(hours=10, minutes=0)
-    return datetime.datetime.now(datetime.timezone.utc) + delta
-
 def home(request):
     dat = []
 
@@ -56,8 +57,9 @@ def home(request):
     else:
         with open(filePath, 'w', encoding='utf-8') as file:
             json.dump([], file)
+        data = []
 
-    return render(request, 'generator/home.html', {'intervals' : intervals, 'data' : dat, 'today' : todayStr, 'nowTime': get_current_time().hour})
+    return render(request, 'generator/home.html', {'fData':data,'intervals' : intervals, 'data' : dat, 'today' : todayStr, 'nowTime': get_current_time().hour})
 
 def done(request):
     interval = int(request.GET['interval'])
@@ -115,3 +117,11 @@ def delZapis(request):
         json.dump(data, file, ensure_ascii=False)
 
     return redirect('/admin/')
+
+def checkChange(request):
+    print(request.GET)
+    response = {
+        'is_taken' : False,
+        'data' : 'maxim'
+    }
+    return JsonResponse(response)

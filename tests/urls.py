@@ -22,4 +22,5 @@ urlpatterns = [
     path('accounts/login/', views.vLogin, name='login'),
     path('admin/', views.admin, name='admin'),
     path('delZapis/', views.delZapis, name='delZapis'),
+    path('checkChange/', views.checkChange, name='checkChange'),
 ]
