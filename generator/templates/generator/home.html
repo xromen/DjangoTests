@@ -8,10 +8,6 @@
 
 
 <div class="container">
-    <div id="tests">
-
-    </div>
-
     {% csrf_token %}
     <script>
     var t = [{'a':1, 'b':2}, {'a':2, 'b':3}];
@@ -35,7 +31,6 @@
         url: "{% url 'checkChange' %}",
         success: function (response) {
             if (response.is_taken == true){
-                $('#tests').after(response.data[0]['secName']);
                 newData = newData.concat(response.data);
                 response.data.forEach(function(item, i, arr){
                     $('#r'+item.aNum+''+item.interval).append(item.room)
