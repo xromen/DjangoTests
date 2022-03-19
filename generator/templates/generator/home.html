@@ -48,7 +48,7 @@
         });
   </script>
 
-  <h1>Запись на стирку {{ today }}</h1>
+  <h1>Запись на стирку {{ today }}  {{nowTime.day}} {{ nowTime.hour }}:{{ nowTime.minute }}</h1>
 
   <form action="{% url 'done' %}">
 
@@ -183,7 +183,7 @@
         <input type="text" class="form-control" aria-label="room" aria-describedby="basic-addon1" name="secName" maxlength="10">
       </div>
 
-      {% if nowTime >= 7 %}
+      {% if isActive %}
     <input type="submit" value="Записаться" class="btn btn-primary" >
       {% else %}
       <input type="submit" value="Записаться" class="btn btn-primary" disabled>

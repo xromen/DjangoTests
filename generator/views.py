@@ -41,6 +41,7 @@ filePath = 'generator/static/history/'+todayStr+'.json'
 def home(request):
     dat = []
 
+    datetime.time(hour=7, minute=30)
     if path.exists(filePath):
         with open(filePath, encoding='utf-8') as file:
             data = json.load(file)
@@ -66,7 +67,7 @@ def home(request):
             json.dump([], file)
         data = []
 
-    return render(request, 'generator/home.html', {'fData':data,'intervals' : intervals, 'data' : dat, 'today' : todayStr, 'nowTime': get_current_time().hour})
+    return render(request, 'generator/home.html', {'fData':data,'intervals' : intervals, 'data' : dat, 'today' : todayStr, 'nowTime': get_current_time(), 'isActive' : get_current_time().time() > datetime.time(hour=7, minute=30)})
 
 def done(request):
     interval = int(request.GET['interval'])
