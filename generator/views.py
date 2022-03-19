@@ -34,7 +34,7 @@ intervals = ['8:00-9:30',
                  '21:30-23:00']
 
 today = get_current_time()
-todayStr = datetime.date.strftime(today, '%d.%m.%Y')
+todayStr = str(today.day)+'.'+str(today.month)+'.'+str(today.year)
 filePath = 'generator/static/history/'+todayStr+'.json'
 
 # Create your views here.
@@ -67,7 +67,7 @@ def home(request):
             json.dump([], file)
         data = []
 
-    return render(request, 'generator/home.html', {'fData':data,'intervals' : intervals, 'data' : dat, 'today' : todayStr, 'nowTime': get_current_time(), 'isActive' : get_current_time().time() > datetime.time(hour=7, minute=30)})
+    return render(request, 'generator/home.html', {'fData':data,'intervals' : intervals, 'data' : dat, 'today' : todayStr, 'nowTime': get_current_time(), 'isActive' : get_current_time().time() >= datetime.time(hour=7, minute=30)})
 
 def done(request):
     interval = int(request.GET['interval'])
@@ -86,6 +86,8 @@ def done(request):
         return render(request, 'generator/nDone.html', {'mess': 'Номер комнаты должен быть числом и не пустым'})
     elif zapis['secName'] == '':
         return render(request, 'generator/nDone.html', {'mess': 'Фамилия не может быть пустой'})
+    elif not get_current_time().time() >= datetime.time(hour=7, minute=30):
+        return render(request, 'generator/nDone.html', {'mess': 'Запись начинается в 7:30'})
     else:
         data.append(zapis)
         data.sort(key=lambda x: ( x['aNum'], x['interval']))
