@@ -82,6 +82,12 @@ def done(request):
 
     if [zapis['interval'], zapis['aNum']] in [[i['interval'], i['aNum']] for i in data]:
         return render(request, 'generator/nDone.html', {'mess': 'Данный интервал стирки уже занят'})
+    elif not zapis['secName'].isalpha():
+        return render(request, 'generator/nDone.html', {'mess': 'Фамилия должна состоять только из букв'})
+    elif len(zapis['secName']) > 10:
+        return render(request, 'generator/nDone.html', {'mess': 'Длина фамилии не должна быть больше 10 символов'})
+    elif len(zapis['room']) > 3:
+        return render(request, 'generator/nDone.html', {'mess': 'Длина номера комнаты не должна быть больше 3 символов'})
     elif not zapis['room'].isdigit():
         return render(request, 'generator/nDone.html', {'mess': 'Номер комнаты должен быть числом и не пустым'})
     elif zapis['secName'] == '':
