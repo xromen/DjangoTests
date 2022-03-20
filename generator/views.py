@@ -32,20 +32,23 @@ intervals = ['8:00-9:30',
                  '18:30-20:00',
                  '20:00-21:30',
                  '21:30-23:00']
+def getTodayStr():
+    today = get_current_time()
+    return str(today.day) + '.' + str(today.month) + '.' + str(today.year)
 
-today = get_current_time()
-todayStr = str(today.day)+'.'+str(today.month)+'.'+str(today.year)
-filePath = 'generator/static/history/'+todayStr+'.json'
+def getFilePath():
+    return 'generator/static/history/' + getTodayStr() + '.json'
 
 # Create your views here.
 def home(request):
+    todayStr = getTodayStr()
+    filePath = getFilePath()
     dat = []
 
     datetime.time(hour=7, minute=30)
     if path.exists(filePath):
         with open(filePath, encoding='utf-8') as file:
             data = json.load(file)
-
 
         a = [[k for k in data if k['aNum'] == i] for i in range(4)]
 
@@ -67,9 +70,16 @@ def home(request):
             json.dump([], file)
         data = []
 
-    return render(request, 'generator/home.html', {'fData':data,'intervals' : intervals, 'data' : dat, 'today' : todayStr, 'nowTime': get_current_time(), 'isActive' : get_current_time().time() >= datetime.time(hour=7, minute=30)})
+    return render(request, 'generator/home.html', {'fData': data,
+                                                   'intervals': intervals,
+                                                   'data': dat,
+                                                   'today': todayStr,
+                                                   'nowTime': get_current_time(),
+                                                   'isActive': get_current_time().time() >= datetime.time(hour=7, minute=30)})
 
 def done(request):
+    filePath = getFilePath()
+
     interval = int(request.GET['interval'])
     zapis = dict()
     zapis['interval'] = interval
@@ -96,7 +106,7 @@ def done(request):
         return render(request, 'generator/nDone.html', {'mess': 'Запись начинается в 7:30'})
     else:
         data.append(zapis)
-        data.sort(key=lambda x: ( x['aNum'], x['interval']))
+        data.sort(key=lambda x: (x['aNum'], x['interval']))
 
         with open(filePath, 'w', encoding='utf-8') as file:
             json.dump(data, file, ensure_ascii=False)
@@ -117,12 +127,14 @@ def vLogin(request):
 
 @login_required
 def admin(request):
+    filePath = getFilePath()
     with open(filePath, encoding='utf-8') as file:
         data = json.load(file)
     return render(request, 'generator/redact.html', {'data' : data, 'intervals': intervals})
 
 
 def delZapis(request):
+    filePath = getFilePath()
     keys = list(request.GET)
     with open(filePath, encoding='utf-8') as file:
         data = json.load(file)
@@ -135,10 +147,10 @@ def delZapis(request):
     return redirect('/admin/')
 
 def checkChange(request):
+    filePath = getFilePath()
     oldData = json.loads(request.POST['content'])
     oldNewData = json.loads(request.POST['newContent'])
     oldData = oldData + oldNewData
-    #print(oldData)
 
     with open(filePath, encoding='utf-8') as file:
         newData = json.load(file)
