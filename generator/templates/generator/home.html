@@ -42,9 +42,22 @@
         return false;
     }
 
+    function onBtn(){
+        var nowTime = new Date();
+        var cmpTime = new Date();
+        cmpTime.setHours(7, 30);
+        if (nowTime >= cmpTime){
+            $('#sBtn').prop('disabled', false);
+        } else {
+            $('#sBtn').prop('disabled', true);
+        }
+    }
+
     $(document).ready(function(){
             check();
+
             setInterval('check()',1000);
+            setInterval('onBtn()', 1000);
         });
   </script>
 
@@ -183,13 +196,16 @@
         <input type="text" class="form-control" aria-label="room" aria-describedby="basic-addon1" name="secName" maxlength="10">
       </div>
 
+      <!--
       {% if isActive %}
-    <input type="submit" value="Записаться" class="btn btn-primary" >
+      <input type="submit" value="Записаться" class="btn btn-primary" >
       {% else %}
-      <input type="submit" value="Записаться" class="btn btn-primary" disabled>
+
       {%endif%}
+      -->
+      <button id="sBtn" type="submit" class="btn btn-primary" disabled>Записаться</button>
   </form>
     <div class="container-lg">
-    По всем вопросам обращаться <a href="https://vk.com/bbrokke" target="_blank">сюда</a>
+    По всем вопросам обращаться <a href="https://vk.com/xromen" target="_blank">сюда</a>
         </div>
 </div>
