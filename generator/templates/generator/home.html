@@ -55,13 +55,15 @@
 
     $(document).ready(function(){
             check();
-
+            var k = new Date();
+            $('#test').append(k.getSeconds())
             setInterval('check()',1000);
             setInterval('onBtn()', 1000);
         });
   </script>
 
-  <h1>Запись на стирку {{ today }}</h1>
+  <h1>Запись на стирку {{ today }} {{ nowTime.second }}</h1>
+    <div id="test"> </div>
 
   <form action="{% url 'done' %}">
 
