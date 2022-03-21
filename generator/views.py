@@ -41,6 +41,15 @@ def getFilePath():
 
 # Create your views here.
 def home(request):
+    if request.COOKIES.get('secNameC'):
+        secNameC = request.COOKIES.get('secNameC')
+    else:
+        secNameC = ''
+    if request.COOKIES.get('roomC'):
+        roomC = request.COOKIES.get('roomC')
+    else:
+        roomC = ''
+
     todayStr = getTodayStr()
     filePath = getFilePath()
     dat = []
@@ -75,7 +84,10 @@ def home(request):
                                                    'data': dat,
                                                    'today': todayStr,
                                                    'nowTime': get_current_time(),
-                                                   'isActive': get_current_time().time() >= datetime.time(hour=7, minute=30)})
+                                                   'isActive': get_current_time().time() >= datetime.time(hour=7, minute=30),
+                                                   'cookies': {'secNameC': secNameC,
+                                                               'roomC': roomC}
+                                                   })
 
 def done(request):
     filePath = getFilePath()
@@ -87,6 +99,11 @@ def done(request):
     zapis['secName'] = request.GET['secName']
     zapis['aNum'] = int(request.GET['aNum'])
 
+    response = redirect('/')
+
+    response.set_cookie('secNameC', zapis['secName'])
+    response.set_cookie('roomC', zapis['room'])
+
     with open(filePath, encoding='utf-8') as file:
         data = json.load(file)
 
@@ -94,7 +111,7 @@ def done(request):
         return render(request, 'generator/nDone.html', {'mess': 'Данный интервал стирки уже занят'})
     elif not zapis['secName'].isalpha():
         return render(request, 'generator/nDone.html', {'mess': 'Фамилия должна состоять только из букв'})
-    elif len(zapis['secName']) > 10:
+    elif len(zapis['secName']) > 15:
         return render(request, 'generator/nDone.html', {'mess': 'Длина фамилии не должна быть больше 10 символов'})
     elif len(zapis['room']) > 3:
         return render(request, 'generator/nDone.html', {'mess': 'Длина номера комнаты не должна быть больше 3 символов'})
@@ -111,7 +128,7 @@ def done(request):
         with open(filePath, 'w', encoding='utf-8') as file:
             json.dump(data, file, ensure_ascii=False)
 
-        return render(request, 'generator/done.html', {'interval': intervals[interval]})
+        return response #render(request, 'generator/done.html', {'interval': intervals[interval]})
 
 def vLogin(request):
     if request.GET:
@@ -138,8 +155,8 @@ def delZapis(request):
     keys = list(request.GET)
     with open(filePath, encoding='utf-8') as file:
         data = json.load(file)
-    for i in keys:
-        data.pop(int(i))
+    for x, i in enumerate(keys):
+        data.pop(int(i)-x)
 
     with open(filePath, 'w', encoding='utf-8') as file:
         json.dump(data, file, ensure_ascii=False)
