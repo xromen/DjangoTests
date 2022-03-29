@@ -7,9 +7,7 @@
 
 <style>
     .center {
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
+      width: 70%;
 }
     .back{
         background-image: url(static/jpg/konets_kontsovy.png);
@@ -29,7 +27,7 @@
 
   <h1>Запись на стирку {{ today }}</h1>
 
-    <img src="static/jpg/konets_kontsovy.png">
+    <img src="static/jpg/konets_kontsovy.png" class="center">
 
   <form action="{% url 'done' %}">
 
