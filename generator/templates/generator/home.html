@@ -5,6 +5,18 @@
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
+<style>
+    .center {
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+}
+    .back{
+        background-image: url(static/jpg/konets_kontsovy.png);
+    }
+
+    </style>
+
 
 
 <div id="event" class="container">
@@ -16,6 +28,8 @@
     <script src="static/js/scripts.js"></script>
 
   <h1>Запись на стирку {{ today }}</h1>
+
+    <img src="static/jpg/konets_kontsovy.png">
 
   <form action="{% url 'done' %}">
 
@@ -170,5 +184,10 @@
   </form>
     <div class="container-lg">
     По всем вопросам обращаться <a href="https://vk.com/xromen" target="_blank">сюда</a>
+
         </div>
+
+
+    <img src="static/jpg/konets_kontsovy.png" class="center">
 </div>
+
