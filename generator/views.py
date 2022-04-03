@@ -101,8 +101,8 @@ def done(request):
 
     response = redirect('/')
 
-    response.set_cookie('secNameC', zapis['secName'])
-    response.set_cookie('roomC', zapis['room'])
+    #response.set_cookie('secNameC', zapis['secName'])
+    #response.set_cookie('roomC', zapis['room'])
 
     with open(filePath, encoding='utf-8') as file:
         data = json.load(file)

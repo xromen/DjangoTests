@@ -3,7 +3,6 @@ var t = [{'a':1, 'b':2}, {'a':2, 'b':3}];
 var newData = [];
 
 function check(){
-    console.log('as');
     var tok = document.getElementsByName('csrfmiddlewaretoken')[0];
 
     var re = /&#x27;/gi;
