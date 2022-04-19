@@ -79,7 +79,8 @@ def home(request):
             json.dump([], file)
         data = []
 
-    return render(request, 'generator/home.html', {'fData': data,
+    if get_current_time().time() >= datetime.time(hour=7, minute=30):
+        return render(request, 'generator/home.html', {'fData': data,
                                                    'intervals': intervals,
                                                    'data': dat,
                                                    'today': todayStr,
@@ -88,7 +89,17 @@ def home(request):
                                                    'cookies': {'secNameC': secNameC,
                                                                'roomC': roomC}
                                                    })
-
+    else:
+        return render(request, 'generator/home.html', {'fData': [],
+                                                       'intervals': intervals,
+                                                       'data': [],
+                                                       'today': todayStr,
+                                                       'nowTime': get_current_time(),
+                                                       'isActive': get_current_time().time() >= datetime.time(hour=7,
+                                                                                                              minute=30),
+                                                       'cookies': {'secNameC': secNameC,
+                                                                   'roomC': roomC}
+                                                       })
 def done(request):
     filePath = getFilePath()
 
@@ -179,4 +190,11 @@ def checkChange(request):
         'is_taken' : not sub==[],
         'data' : sub
     }
-    return JsonResponse(response)
+
+    if get_current_time().time() >= datetime.time(hour=7, minute=30):
+        return JsonResponse(response)
+    else:
+        return JsonResponse({
+        'is_taken' : False,
+        'data' : []
+    })
