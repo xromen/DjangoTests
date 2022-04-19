@@ -191,7 +191,7 @@ def checkChange(request):
         'data' : sub
     }
 
-    if get_current_time().time() >= datetime.time(hour=7, minute=30):
+    if get_current_time().time() >= datetime.time(hour=23, minute=30):
         return JsonResponse(response)
     else:
         return JsonResponse({
