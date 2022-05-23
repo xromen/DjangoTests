@@ -6,6 +6,7 @@ from django.http import JsonResponse
 import json
 import datetime
 from os import path
+from string import punctuation
 
 
 def get_interval(d):
@@ -32,12 +33,54 @@ intervals = ['8:00-9:30',
                  '18:30-20:00',
                  '20:00-21:30',
                  '21:30-23:00']
+
+def getListDatesStr():
+    l = []
+    today = get_current_time()
+    for i in range(10):
+        l.append(str(today.day) + '.' + str(today.month) + '.' + str(today.year))
+        today = today + datetime.timedelta(days=1)
+    return l
+
 def getTodayStr():
     today = get_current_time()
     return str(today.day) + '.' + str(today.month) + '.' + str(today.year)
 
-def getFilePath():
-    return 'generator/static/history/' + getTodayStr() + '.json'
+def getFilePath(date):
+    return 'generator/static/history/' + date + '.json'
+
+def getZapisList(todayStr):
+    if get_current_time().time() >= datetime.time(hour=7, minute=30):
+        filePath = getFilePath(todayStr)
+        dat = []
+        if path.exists(filePath):
+            with open(filePath, encoding='utf-8') as file:
+                data = json.load(file)
+
+            a = [[k for k in data if k['aNum'] == i] for i in range(4)]
+
+            if not len(data) == 0:
+                for j, elem in enumerate(a):
+                    k = 0
+                    dat.append([])
+                    if len(elem) == 0:
+                        continue
+                    for i in range(10):
+                        if elem[k]['interval'] == i:
+                            dat[j].append(elem[k])
+                            if not k == len(elem) - 1:
+                                k = k + 1
+                        else:
+                            dat[j].append({})
+        else:
+            with open(filePath, 'w', encoding='utf-8') as file:
+                json.dump([], file)
+            data = []
+
+        return (data, dat)
+    else:
+        return ([], [])
+
 
 # Create your views here.
 def home(request):
@@ -50,77 +93,52 @@ def home(request):
     else:
         roomC = ''
 
-    todayStr = getTodayStr()
-    filePath = getFilePath()
-    dat = []
+    rowData, sortData = getZapisList(getTodayStr())
 
-    datetime.time(hour=7, minute=30)
-    if path.exists(filePath):
-        with open(filePath, encoding='utf-8') as file:
-            data = json.load(file)
-
-        a = [[k for k in data if k['aNum'] == i] for i in range(4)]
-
-        if not len(data) == 0:
-            for j, elem in enumerate(a):
-                k = 0
-                dat.append([])
-                if len(elem) == 0:
-                    continue
-                for i in range(10):
-                    if elem[k]['interval'] == i:
-                        dat[j].append(elem[k])
-                        if not k == len(elem) - 1:
-                            k = k + 1
-                    else:
-                        dat[j].append({})
-    else:
-        with open(filePath, 'w', encoding='utf-8') as file:
-            json.dump([], file)
-        data = []
-
-    if get_current_time().time() >= datetime.time(hour=7, minute=30):
-        return render(request, 'generator/home.html', {'fData': data,
+    return render(request, 'generator/home.html', {'fData': rowData,
                                                    'intervals': intervals,
-                                                   'data': dat,
-                                                   'today': todayStr,
+                                                   'data': sortData,
+                                                   'today': getTodayStr(),
                                                    'nowTime': get_current_time(),
-                                                   'isActive': get_current_time().time() >= datetime.time(hour=7, minute=30),
+                                                   'isActive': get_current_time().time() >= datetime.time(hour=7,
+                                                                                                          minute=30),
                                                    'cookies': {'secNameC': secNameC,
                                                                'roomC': roomC}
                                                    })
-    else:
-        return render(request, 'generator/home.html', {'fData': [],
-                                                       'intervals': intervals,
-                                                       'data': [],
-                                                       'today': todayStr,
-                                                       'nowTime': get_current_time(),
-                                                       'isActive': get_current_time().time() >= datetime.time(hour=7,
-                                                                                                              minute=30),
-                                                       'cookies': {'secNameC': secNameC,
-                                                                   'roomC': roomC}
-                                                       })
+
+
 def done(request):
-    filePath = getFilePath()
+    if 'date' in request.GET:
+        filePath = getFilePath(request.GET['date'])
+    else:
+        filePath = getFilePath(getTodayStr())
 
     interval = int(request.GET['interval'])
     zapis = dict()
     zapis['interval'] = interval
     zapis['room'] = request.GET['room']
-    zapis['secName'] = request.GET['secName']
+    zapis['secName'] = request.GET['secName'].replace(' ', '')
     zapis['aNum'] = int(request.GET['aNum'])
 
-    response = redirect('/')
+    if 'zapis' in request.META.get('HTTP_REFERER'):
+        response = redirect('/admin/zapis')
+    else:
+        response = redirect('/')
 
     #response.set_cookie('secNameC', zapis['secName'])
     #response.set_cookie('roomC', zapis['room'])
 
-    with open(filePath, encoding='utf-8') as file:
-        data = json.load(file)
+    if path.exists(filePath):
+        with open(filePath, encoding='utf-8') as file:
+            data = json.load(file)
+    else:
+        with open(filePath, 'w', encoding='utf-8') as file:
+            json.dump([], file)
+        data = []
 
     if [zapis['interval'], zapis['aNum']] in [[i['interval'], i['aNum']] for i in data]:
         return render(request, 'generator/nDone.html', {'mess': 'Данный интервал стирки уже занят'})
-    elif not zapis['secName'].isalpha():
+    elif not set(punctuation).isdisjoint(zapis['secName']):
         return render(request, 'generator/nDone.html', {'mess': 'Фамилия должна состоять только из букв'})
     elif len(zapis['secName']) > 15:
         return render(request, 'generator/nDone.html', {'mess': 'Длина фамилии не должна быть больше 10 символов'})
@@ -155,14 +173,14 @@ def vLogin(request):
 
 @login_required
 def admin(request):
-    filePath = getFilePath()
+    filePath = getFilePath(getTodayStr())
     with open(filePath, encoding='utf-8') as file:
         data = json.load(file)
     return render(request, 'generator/redact.html', {'data' : data, 'intervals': intervals})
 
 
 def delZapis(request):
-    filePath = getFilePath()
+    filePath = getFilePath(getTodayStr())
     keys = list(request.GET)
     with open(filePath, encoding='utf-8') as file:
         data = json.load(file)
@@ -175,16 +193,13 @@ def delZapis(request):
     return redirect('/admin/')
 
 def checkChange(request):
-    filePath = getFilePath()
     oldData = json.loads(request.POST['content'])
     oldNewData = json.loads(request.POST['newContent'])
     oldData = oldData + oldNewData
 
-    with open(filePath, encoding='utf-8') as file:
-        newData = json.load(file)
+    newData, _ = getZapisList(getTodayStr())
 
     sub = lists_subtract(newData, oldData)
-    #print(sub)
 
     response = {
         'is_taken' : not sub==[],
@@ -198,3 +213,7 @@ def checkChange(request):
         'is_taken' : False,
         'data' : []
     })
+
+@login_required
+def admZapis(request):
+    return render(request, 'generator/admZapis.html', {'intervals': intervals, 'listDates' : getListDatesStr()})
