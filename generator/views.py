@@ -148,7 +148,7 @@ def done(request):
         return render(request, 'generator/nDone.html', {'mess': 'Номер комнаты должен быть числом и не пустым'})
     elif zapis['secName'] == '':
         return render(request, 'generator/nDone.html', {'mess': 'Фамилия не может быть пустой'})
-    elif not get_current_time().time() >= datetime.time(hour=7, minute=30):
+    elif not get_current_time().time() >= datetime.time(hour=7, minute=30) and not 'zapis' in request.META.get('HTTP_REFERER'):
         return render(request, 'generator/nDone.html', {'mess': 'Запись начинается в 7:30'})
     else:
         data.append(zapis)
